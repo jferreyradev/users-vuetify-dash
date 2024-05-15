@@ -1,41 +1,24 @@
-<script>
-const dniInput = ref('')
-const URL_API = 'https://midliq-api-jr2sc3ef7gnx.deno.dev/api'
-
-function useBoletasLiq(getId) {
-
-  return useFetch(() => `${URL_API}/view/personaLista?Documento=${getId()}`)
-
-}
-const dniInput = ref('')
+<script setup>
+import { useStatefulComposable } from '@/composables/stateful.js'
+import { useFetch } from "@/composables/fetch.js";
 
 const { globalState, updateValues } = useStatefulComposable()
 
-function handleSubmit() {
-  form.value.dni = dniInput.value
-  form.value.isVerify = true
-  console.log("submitting", form.value);
-  updateValues(form, true)
-  console.log(globalState.someObject.dni)
-  console.log(globalState.someObject.password)
-  console.log(globalState.someObject.isVerify)
+const URL_API = 'https://midliq-api-jr2sc3ef7gnx.deno.dev/api'
 
+function useRegisterCheck(getId) {
+  return useFetch(() => `${URL_API}/view/users?DNI=${getId()}`)
 }
+
+const { data, error, isPending } = useRegisterCheck(() => globalState.someObject.dni)
+
 </script>
 
 <template>
-  <v-container>
-    <v-row class="d-flex align-center justify-center">
-      <v-col cols="auto">
-        <v-text-field v-model="dniInput" color="primary" block label="Ingrese su DNI" />
-        <v-btn color="primary" block class="mb-10" @click="handleSubmit">Verificar DNI</v-btn>
-
-      </v-col>
-
-
-    </v-row>
-
-    <button ref="submitBtn" type="submit" class="d-none">Submit</button>
-  </v-container>
-
+    <div v-if="!data">
+      <h2>Debe registarse</h2>
+    </div>
+      <span>
+        {{ globalState.someObject }}
+      </span>
 </template>

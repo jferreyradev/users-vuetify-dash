@@ -1,8 +1,9 @@
 <script setup>
 import { ref } from 'vue';
-import { useFetch } from "@/composables/useFetch.js";
+import { useFetch } from "@/composables/fetch.js";
 import { useStatefulComposable } from '@/composables/stateful.js'
 import { useRouter } from 'vue-router';
+import LoginDniVerify from '@/components/LoginDniVerify.vue'
 
 const form = ref({
   dni: '',
@@ -29,8 +30,19 @@ const router = useRouter()
 function handleSubmit() {
   form.value.dni = dniInput.value
   form.value.isVerify = true
-  console.log("submitting", form.value);
-  updateValues(form, true)
+  if (data.value) {
+    const obj = {
+      dni: data[0].DOCUMENTO,
+      nombre: data[0].NOMBRE,
+      apellido: data[0].APELLIDO,
+      mail: '',
+      password: ''
+    }
+    console.log("submitting", obj.value);
+
+    updateValues(obj, true)
+  }
+
   console.log(globalState.someObject.dni)
   console.log(globalState.someObject.password)
   console.log(globalState.someObject.isVerify)
@@ -46,6 +58,7 @@ function handleLogin() {
 function reset() {
   form.value.dni = ''
   form.value.isVerify = false
+  dniInput.value = ''
 }
 const submitBtn = ref();
 const submit = () => submitBtn.value.click();
@@ -56,7 +69,7 @@ const submit = () => submitBtn.value.click();
     <v-row class="d-flex align-center justify-center mb-5">
       <h2>Ingreso a su boleta</h2>
     </v-row>
-    <v-row class="d-flex align-center justify-center mb-5">
+    <v-row v-if="!form.isVerify" class="d-flex align-center justify-center mb-5">
       <span>
         Debe ingresar su DNI para corroborar que se encuentra en el sistema.
       </span>
@@ -88,9 +101,16 @@ const submit = () => submitBtn.value.click();
             </div>
           </div>
         </div>
+
         <div v-if="form.isVerify && error">
           <span>El DNI ingresado no esta regitrado en el sistema.</span>
+          <div class="mt-10">
+            <v-btn color="primary" block @click="reset">Volver</v-btn>
+          </div>
         </div>
+      </v-row>
+      <v-row>
+        <LoginDniVerify />
       </v-row>
     </v-form>
   </v-container>

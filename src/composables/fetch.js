@@ -1,34 +1,39 @@
 // fetch.js
 import { ref, watchEffect } from 'vue'
 
-export function useFetch(url) {
-    const data = ref(null)
+export function useFetch(getUrl, type, body) {
     const error = ref(null)
     const isPending = ref(false)
-
-    const fetchData = () => {
-        // reset state before fetching..
-        data.value = null
-        error.value = null
-        isPending.value = true
-        fetch(url())
-            .then((res) => {
-                res.json()
-            })
-            .then((_data) => {
-                data.value = _data
-            })
-            .catch((err) => {
-                console.log(err)
-                error.value = err
-            }
-            )
-            .finally(() => (isPending.value = false))
-    }
+    const data = ref({});
 
     watchEffect(() => {
-        fetchData()
-    })
+        isPending.value = true
+        data.value = null
+        error.value = null
+
+        let requestOptions;
+        
+        if (body) {
+            requestOptions = {
+                method: `${type}`, // POST, etc
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(body),
+            };
+        }
+    
+        console.log('fetch ', getUrl())
+    
+        fetch(getUrl(), requestOptions ? requestOptions : null)
+          .then((res) => res.json())
+          .then((_data) => {
+            data.value = _data
+            isPending.value = false
+          })
+          .catch((err) => {
+            error.value = err
+            isPending.value = false
+          })
+      })
 
     return { data, error, isPending }
 }
